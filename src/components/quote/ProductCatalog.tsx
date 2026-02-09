@@ -20,11 +20,14 @@ interface ProductCatalogProps {
 
 export const ProductCatalog = ({ trade, sectionId, onAddProduct }: ProductCatalogProps) => {
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<string>("all");
+  const [category, setCategory] = useState<string | undefined>("all");
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   const products = getProductsByTrade(trade);
-  const categories = getCategories(trade);
+  const categories = getCategories(trade).filter(
+  (cat): cat is string => cat !== ""
+);
+
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
