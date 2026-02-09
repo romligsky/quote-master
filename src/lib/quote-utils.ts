@@ -1,11 +1,13 @@
-import { Quote, QuoteCalculations, QuoteItem } from "@/types/quote";
+import { Quote, QuoteCalculations, QuoteSection, CompanyInfo } from "@/types/quote";
 
 export const calculateQuote = (quote: Quote): QuoteCalculations => {
-  // Sous-total produits
-  const subtotalProducts = quote.items.reduce((sum, item) => sum + item.total, 0);
+  // Sous-total produits (seulement les lignes incluses)
+  const subtotalProducts = quote.items
+    .filter(item => item.included)
+    .reduce((sum, item) => sum + item.total, 0);
   
-  // Coût main d'œuvre
-  const laborCost = quote.laborHours * quote.laborRate;
+  // Coût main d'œuvre (seulement si visible)
+  const laborCost = quote.laborVisible ? quote.laborHours * quote.laborRate : 0;
   
   // Sous-total HT (avant marge)
   const subtotalHT = subtotalProducts + laborCost;
@@ -56,10 +58,37 @@ export const generateQuoteNumber = (): string => {
   return `DEV-${year}${month}-${random}`;
 };
 
+export const createDefaultCompanyInfo = (): CompanyInfo => ({
+  name: "Mon Entreprise",
+  address: "",
+  city: "",
+  postalCode: "",
+  phone: "",
+  email: "",
+  siret: "",
+});
+
+export const createDefaultSection = (name: string = "Prestations", order: number = 0): QuoteSection => ({
+  id: crypto.randomUUID(),
+  name,
+  order,
+});
+
 export const createEmptyQuote = (trade: "electrician" | "carpenter"): Quote => {
   const today = new Date();
   const validUntil = new Date(today);
   validUntil.setDate(validUntil.getDate() + 30);
+  
+  // Try to load saved company info from localStorage
+  let companyInfo = createDefaultCompanyInfo();
+  try {
+    const saved = localStorage.getItem("deviselec_company");
+    if (saved) {
+      companyInfo = JSON.parse(saved);
+    }
+  } catch (e) {
+    console.error("Error loading company info:", e);
+  }
   
   return {
     id: crypto.randomUUID(),
@@ -75,12 +104,61 @@ export const createEmptyQuote = (trade: "electrician" | "carpenter"): Quote => {
       city: "",
       postalCode: "",
     },
+    companyInfo,
+    sections: [createDefaultSection("Travaux", 0)],
     items: [],
     laborHours: 0,
     laborRate: 45,
+    laborVisible: true,
     marginPercent: 20,
     discountPercent: 0,
     tvaRate: 20,
     notes: "",
   };
+};
+
+export const saveCompanyInfo = (companyInfo: CompanyInfo): void => {
+  try {
+    localStorage.setItem("deviselec_company", JSON.stringify(companyInfo));
+  } catch (e) {
+    console.error("Error saving company info:", e);
+  }
+};
+
+export const saveQuoteToLocal = (quote: Quote): void => {
+  try {
+    localStorage.setItem("deviselec_current_quote", JSON.stringify(quote));
+  } catch (e) {
+    console.error("Error saving quote:", e);
+  }
+};
+
+export const loadQuoteFromLocal = (): Quote | null => {
+  try {
+    const saved = localStorage.getItem("deviselec_current_quote");
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (e) {
+    console.error("Error loading quote:", e);
+  }
+  return null;
+};
+
+export const clearLocalQuote = (): void => {
+  try {
+    localStorage.removeItem("deviselec_current_quote");
+  } catch (e) {
+    console.error("Error clearing quote:", e);
+  }
+};
+
+// Get items for a specific section
+export const getItemsBySection = (quote: Quote, sectionId: string) => {
+  return quote.items.filter(item => item.sectionId === sectionId);
+};
+
+// Get included items only
+export const getIncludedItems = (quote: Quote) => {
+  return quote.items.filter(item => item.included);
 };

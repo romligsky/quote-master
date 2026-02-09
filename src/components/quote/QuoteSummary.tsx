@@ -2,7 +2,8 @@ import { Quote, QuoteCalculations } from "@/types/quote";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator, Percent, Clock, Wallet } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Calculator, Percent, Clock, Wallet, Eye, EyeOff } from "lucide-react";
 import { formatCurrency } from "@/lib/quote-utils";
 
 interface QuoteSummaryProps {
@@ -27,9 +28,27 @@ export const QuoteSummary = ({
       <CardContent className="space-y-6">
         {/* Labor */}
         <div className="space-y-3">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <Clock className="w-4 h-4" />
-            Main d'œuvre
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <Clock className="w-4 h-4" />
+              Main d'œuvre
+            </div>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="laborVisible" className="text-xs text-muted-foreground">
+                {quote.laborVisible ? (
+                  <Eye className="w-3.5 h-3.5" />
+                ) : (
+                  <EyeOff className="w-3.5 h-3.5" />
+                )}
+              </Label>
+              <Switch
+                id="laborVisible"
+                checked={quote.laborVisible}
+                onCheckedChange={(checked) =>
+                  onUpdateQuote({ laborVisible: checked })
+                }
+              />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
@@ -45,6 +64,7 @@ export const QuoteSummary = ({
                 onChange={(e) =>
                   onUpdateQuote({ laborHours: parseFloat(e.target.value) || 0 })
                 }
+                disabled={!quote.laborVisible}
               />
             </div>
             <div className="space-y-1">
@@ -59,6 +79,7 @@ export const QuoteSummary = ({
                 onChange={(e) =>
                   onUpdateQuote({ laborRate: parseFloat(e.target.value) || 0 })
                 }
+                disabled={!quote.laborVisible}
               />
             </div>
           </div>
@@ -128,13 +149,15 @@ export const QuoteSummary = ({
         {/* Calculations breakdown */}
         <div className="border-t pt-4 space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Sous-total produits</span>
+            <span className="text-muted-foreground">Coût matériel</span>
             <span>{formatCurrency(calculations.subtotalProducts)}</span>
           </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Main d'œuvre</span>
-            <span>{formatCurrency(calculations.laborCost)}</span>
-          </div>
+          {quote.laborVisible && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Main d'œuvre</span>
+              <span>{formatCurrency(calculations.laborCost)}</span>
+            </div>
+          )}
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Sous-total HT</span>
             <span>{formatCurrency(calculations.subtotalHT)}</span>
@@ -144,7 +167,7 @@ export const QuoteSummary = ({
               <span className="text-muted-foreground">
                 Marge ({quote.marginPercent}%)
               </span>
-              <span className="text-success">
+              <span className="text-green-600">
                 +{formatCurrency(calculations.margin)}
               </span>
             </div>
