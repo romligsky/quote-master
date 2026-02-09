@@ -61,7 +61,7 @@ const QuoteBuilder = () => {
   const [trade, setTrade] = useState<Trade | null>(null);
   const [quote, setQuote] = useState<Quote | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [selectedSectionId, setSelectedSectionId] = useState<string>("");
+  const [selectedSectionId, setSelectedSectionId] = useState<string | undefined>(undefined);
   const [companyExpanded, setCompanyExpanded] = useState(false);
 
   // Load saved quote on mount
