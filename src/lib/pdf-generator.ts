@@ -3,6 +3,18 @@ import autoTable from "jspdf-autotable";
 import { Quote, QuoteCalculations } from "@/types/quote";
 import { formatCurrency } from "@/lib/quote-utils";
 
+const formatDateFR = (dateString: string) => {
+  try {
+    return new Date(dateString).toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  } catch {
+    return dateString;
+  }
+};
+
 export const generateQuotePDF = (quote: Quote, calculations: QuoteCalculations) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -11,7 +23,7 @@ export const generateQuotePDF = (quote: Quote, calculations: QuoteCalculations) 
   // Header - Company info
   doc.setFontSize(20);
   doc.setFont("helvetica", "bold");
-  doc.text(quote.companyInfo.name, 14, yPos);
+  doc.text(quote.companyInfo.name || "Mon Entreprise", 14, yPos);
   
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
@@ -22,7 +34,7 @@ export const generateQuotePDF = (quote: Quote, calculations: QuoteCalculations) 
     yPos += 5;
   }
   if (quote.companyInfo.postalCode || quote.companyInfo.city) {
-    doc.text(`${quote.companyInfo.postalCode} ${quote.companyInfo.city}`, 14, yPos);
+    doc.text(`${quote.companyInfo.postalCode} ${quote.companyInfo.city}`.trim(), 14, yPos);
     yPos += 5;
   }
   if (quote.companyInfo.phone) {
@@ -40,7 +52,7 @@ export const generateQuotePDF = (quote: Quote, calculations: QuoteCalculations) 
   // Quote info (right side)
   doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(59, 130, 246); // Primary blue
+  doc.setTextColor(59, 130, 246);
   doc.text("DEVIS", pageWidth - 14, 20, { align: "right" });
   
   doc.setTextColor(0, 0, 0);
@@ -72,7 +84,7 @@ export const generateQuotePDF = (quote: Quote, calculations: QuoteCalculations) 
     clientY += 5;
   }
   if (quote.client.postalCode || quote.client.city) {
-    doc.text(`${quote.client.postalCode} ${quote.client.city}`, 18, clientY);
+    doc.text(`${quote.client.postalCode} ${quote.client.city}`.trim(), 18, clientY);
     clientY += 5;
   }
   if (quote.client.phone) {
@@ -94,7 +106,6 @@ export const generateQuotePDF = (quote: Quote, calculations: QuoteCalculations) 
       (item) => item.sectionId === section.id
     );
 
-    // Check if we need a new page
     if (yPos > 250) {
       doc.addPage();
       yPos = 20;
@@ -150,7 +161,7 @@ export const generateQuotePDF = (quote: Quote, calculations: QuoteCalculations) 
     yPos = (doc as any).lastAutoTable.finalY + 10;
   });
 
-  // Labor (if visible)
+  // Labor (only if visible and > 0)
   if (quote.laborVisible && calculations.laborCost > 0) {
     if (yPos > 250) {
       doc.addPage();
@@ -181,44 +192,22 @@ export const generateQuotePDF = (quote: Quote, calculations: QuoteCalculations) 
   yPos += 8;
 
   doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
+  doc.setFont("helvetica", "bold");
 
-  // Material total
-  doc.text("Total matériel HT:", totalsX, yPos);
-  doc.text(formatCurrency(calculations.subtotalProducts), pageWidth - 14, yPos, { align: "right" });
+  // Total HT
+  doc.text("Total HT:", totalsX, yPos);
+  doc.text(formatCurrency(calculations.totalHT), pageWidth - 14, yPos, { align: "right" });
   yPos += 6;
-
-  // Labor
-  if (quote.laborVisible && calculations.laborCost > 0) {
-    doc.text("Main d'œuvre HT:", totalsX, yPos);
-    doc.text(formatCurrency(calculations.laborCost), pageWidth - 14, yPos, { align: "right" });
-    yPos += 6;
-  }
-
-  // Margin
-  if (calculations.margin > 0) {
-    doc.text(`Marge (${quote.marginPercent}%):`, totalsX, yPos);
-    doc.text(formatCurrency(calculations.margin), pageWidth - 14, yPos, { align: "right" });
-    yPos += 6;
-  }
 
   // Discount
   if (calculations.discount > 0) {
-    doc.text(`Remise (${quote.discountPercent}%):`, totalsX, yPos);
+    doc.setFont("helvetica", "normal");
+    doc.text(`dont remise (${quote.discountPercent}%):`, totalsX, yPos);
     doc.setTextColor(220, 38, 38);
     doc.text(`-${formatCurrency(calculations.discount)}`, pageWidth - 14, yPos, { align: "right" });
     doc.setTextColor(0, 0, 0);
     yPos += 6;
   }
-
-  // Total HT
-  doc.setDrawColor(229, 231, 235);
-  doc.line(totalsX, yPos, pageWidth - 14, yPos);
-  yPos += 6;
-  doc.setFont("helvetica", "bold");
-  doc.text("Total HT:", totalsX, yPos);
-  doc.text(formatCurrency(calculations.totalHT), pageWidth - 14, yPos, { align: "right" });
-  yPos += 6;
 
   // TVA
   doc.setFont("helvetica", "normal");
@@ -247,7 +236,9 @@ export const generateQuotePDF = (quote: Quote, calculations: QuoteCalculations) 
     }
 
     doc.setFillColor(249, 250, 251);
-    doc.roundedRect(14, yPos - 4, pageWidth - 28, 30, 2, 2, "F");
+    const splitNotes = doc.splitTextToSize(quote.notes, pageWidth - 40);
+    const notesHeight = Math.max(30, splitNotes.length * 4 + 16);
+    doc.roundedRect(14, yPos - 4, pageWidth - 28, notesHeight, 2, 2, "F");
     
     doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
@@ -257,7 +248,6 @@ export const generateQuotePDF = (quote: Quote, calculations: QuoteCalculations) 
     doc.setTextColor(0, 0, 0);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
-    const splitNotes = doc.splitTextToSize(quote.notes, pageWidth - 40);
     doc.text(splitNotes, 18, yPos + 10);
   }
 
@@ -279,12 +269,4 @@ export const generateQuotePDF = (quote: Quote, calculations: QuoteCalculations) 
   const filename = `Devis_${quote.number}_${clientName}.pdf`;
   
   doc.save(filename);
-};
-
-const formatDateFR = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
 };

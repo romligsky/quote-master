@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Calculator, Percent, Clock, Wallet, Eye, EyeOff } from "lucide-react";
+import { Calculator, Clock, Wallet, Eye, EyeOff } from "lucide-react";
 import { formatCurrency } from "@/lib/quote-utils";
 
 interface QuoteSummaryProps {
@@ -50,6 +50,11 @@ export const QuoteSummary = ({
               />
             </div>
           </div>
+          <p className="text-xs text-muted-foreground">
+            {quote.laborVisible
+              ? "Visible sur le devis et incluse dans les calculs"
+              : "Masquée sur le devis mais incluse dans le total"}
+          </p>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label htmlFor="laborHours" className="text-xs">
@@ -64,7 +69,6 @@ export const QuoteSummary = ({
                 onChange={(e) =>
                   onUpdateQuote({ laborHours: parseFloat(e.target.value) || 0 })
                 }
-                disabled={!quote.laborVisible}
               />
             </div>
             <div className="space-y-1">
@@ -79,36 +83,14 @@ export const QuoteSummary = ({
                 onChange={(e) =>
                   onUpdateQuote({ laborRate: parseFloat(e.target.value) || 0 })
                 }
-                disabled={!quote.laborVisible}
               />
             </div>
           </div>
         </div>
 
-        {/* Margin & Discount */}
+        {/* Discount & TVA */}
         <div className="space-y-3">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <Percent className="w-4 h-4" />
-            Marge & Remise
-          </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label htmlFor="margin" className="text-xs">
-                Marge (%)
-              </Label>
-              <Input
-                id="margin"
-                type="number"
-                min="0"
-                max="100"
-                value={quote.marginPercent}
-                onChange={(e) =>
-                  onUpdateQuote({
-                    marginPercent: parseFloat(e.target.value) || 0,
-                  })
-                }
-              />
-            </div>
             <div className="space-y-1">
               <Label htmlFor="discount" className="text-xs">
                 Remise (%)
@@ -126,62 +108,26 @@ export const QuoteSummary = ({
                 }
               />
             </div>
+            <div className="space-y-1">
+              <Label htmlFor="tva" className="text-xs">
+                TVA (%)
+              </Label>
+              <Input
+                id="tva"
+                type="number"
+                min="0"
+                max="100"
+                value={quote.tvaRate}
+                onChange={(e) =>
+                  onUpdateQuote({ tvaRate: parseFloat(e.target.value) || 0 })
+                }
+              />
+            </div>
           </div>
         </div>
 
-        {/* TVA */}
-        <div className="space-y-1">
-          <Label htmlFor="tva" className="text-xs text-muted-foreground">
-            TVA (%)
-          </Label>
-          <Input
-            id="tva"
-            type="number"
-            min="0"
-            max="100"
-            value={quote.tvaRate}
-            onChange={(e) =>
-              onUpdateQuote({ tvaRate: parseFloat(e.target.value) || 0 })
-            }
-          />
-        </div>
-
-        {/* Calculations breakdown */}
+        {/* Totals - Clean display */}
         <div className="border-t pt-4 space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Coût matériel</span>
-            <span>{formatCurrency(calculations.subtotalProducts)}</span>
-          </div>
-          {quote.laborVisible && (
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Main d'œuvre</span>
-              <span>{formatCurrency(calculations.laborCost)}</span>
-            </div>
-          )}
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Sous-total HT</span>
-            <span>{formatCurrency(calculations.subtotalHT)}</span>
-          </div>
-          {calculations.margin > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">
-                Marge ({quote.marginPercent}%)
-              </span>
-              <span className="text-green-600">
-                +{formatCurrency(calculations.margin)}
-              </span>
-            </div>
-          )}
-          {calculations.discount > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">
-                Remise ({quote.discountPercent}%)
-              </span>
-              <span className="text-destructive">
-                -{formatCurrency(calculations.discount)}
-              </span>
-            </div>
-          )}
           <div className="flex justify-between text-sm font-medium">
             <span>Total HT</span>
             <span>{formatCurrency(calculations.totalHT)}</span>
