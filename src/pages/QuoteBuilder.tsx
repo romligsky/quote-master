@@ -1,4 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
+import logo from "@/assets/logo.png";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { Quote, Trade, Product, QuoteItem, QuoteSection } from "@/types/quote";
 import {
