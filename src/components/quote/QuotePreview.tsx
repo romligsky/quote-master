@@ -69,6 +69,15 @@ export const QuotePreview = ({
         <div className="p-8 bg-white text-black" id="quote-preview">
           {/* Header */}
           <div className="flex justify-between items-start mb-8">
+            <div className="flex items-center gap-4">
+                {quote.companyInfo.logo && (
+                  <img
+                    src={quote.companyInfo.logo}
+                    alt="Logo entreprise"
+                    className="h-16 w-auto object-contain"
+                  />
+                )}
+                </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
                 {quote.companyInfo.name}
@@ -91,9 +100,9 @@ export const QuotePreview = ({
                 <p className="text-sm text-gray-600">SIRET: {quote.companyInfo.siret}</p>
               )}
             </div>
-            <div className="text-right">
-              <h2 className="text-xl font-bold text-blue-600 mb-2">DEVIS</h2>
-              <p className="text-sm text-gray-600">N° {quote.number}</p>
+            <div className="text-right ">
+              <h2 className="text-2xl font-bold text-blue-600 mb-2 ">{quote.title || "Devis"}</h2>
+              <p className="text-sm text-muted-foreground">N° {quote.number}</p>
               <p className="text-sm text-gray-600">Date: {formatDate(quote.date)}</p>
               <p className="text-sm text-gray-600">
                 Valide jusqu'au: {formatDate(quote.validUntil)}

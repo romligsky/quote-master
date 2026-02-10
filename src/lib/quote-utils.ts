@@ -1,35 +1,37 @@
 import { Quote, QuoteCalculations, QuoteSection, CompanyInfo } from "@/types/quote";
 
 export const calculateQuote = (quote: Quote): QuoteCalculations => {
-  // Sous-total produits (seulement les lignes incluses)
+  // 1️⃣ Sous-total produits (lignes incluses uniquement)
   const subtotalProducts = quote.items
     .filter(item => item.included)
     .reduce((sum, item) => sum + item.total, 0);
-  
-  // Coût main d'œuvre (toujours calculé si heures > 0)
-  const laborCost = quote.laborHours * quote.laborRate;
-  
-  // Sous-total HT (avant marge)
+
+  // 2️⃣ Coût main d'œuvre (SEULEMENT si visible)
+  const laborCost = quote.laborVisible
+    ? quote.laborHours * quote.laborRate
+    : 0;
+
+  // 3️⃣ Sous-total HT
   const subtotalHT = subtotalProducts + laborCost;
-  
-  // Marge
+
+  // 4️⃣ Marge
   const margin = subtotalHT * (quote.marginPercent / 100);
-  
-  // Sous-total avec marge
+
+  // 5️⃣ Sous-total avec marge
   const subtotalWithMargin = subtotalHT + margin;
-  
-  // Remise
+
+  // 6️⃣ Remise
   const discount = subtotalWithMargin * (quote.discountPercent / 100);
-  
-  // Total HT (après remise)
+
+  // 7️⃣ Total HT
   const totalHT = subtotalWithMargin - discount;
-  
-  // TVA
+
+  // 8️⃣ TVA
   const tva = totalHT * (quote.tvaRate / 100);
-  
-  // Total TTC
+
+  // 9️⃣ Total TTC
   const totalTTC = totalHT + tva;
-  
+
   return {
     subtotalProducts,
     laborCost,
@@ -42,6 +44,7 @@ export const calculateQuote = (quote: Quote): QuoteCalculations => {
     totalTTC,
   };
 };
+
 
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat("fr-FR", {
@@ -66,6 +69,7 @@ export const createDefaultCompanyInfo = (): CompanyInfo => ({
   phone: "",
   email: "",
   siret: "",
+  logo: undefined,
 });
 
 export const createDefaultSection = (name: string = "Prestations", order: number = 0): QuoteSection => ({
@@ -92,6 +96,7 @@ export const createEmptyQuote = (trade: "electrician" | "carpenter"): Quote => {
   
   return {
     id: crypto.randomUUID(),
+     title: "Devis",
     number: generateQuoteNumber(),
     date: today.toISOString().split("T")[0],
     validUntil: validUntil.toISOString().split("T")[0],

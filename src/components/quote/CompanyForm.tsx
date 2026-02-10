@@ -1,3 +1,4 @@
+
 import { CompanyInfo } from "@/types/quote";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,8 +13,48 @@ export const CompanyForm = ({ company, onChange }: CompanyFormProps) => {
     onChange({ ...company, [field]: value });
   };
 
+  const handleLogoUpload = (file: File) => {
+  const reader = new FileReader();
+  reader.onload = () => {
+    onChange({
+      ...company,
+      logo: reader.result as string,
+    });
+  };
+  reader.readAsDataURL(file);
+};
+
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-4">
+        {company.logo ? (
+          <img
+            src={company.logo}
+            alt="Logo entreprise"
+            className="h-20 w-auto object-contain rounded border bg-white p-2"
+          />
+        ) : (
+          <div className="h-20 w-32 flex items-center justify-center border border-dashed rounded text-xs text-muted-foreground">
+            Aucun logo
+          </div>
+        )}
+
+        <div className="flex flex-col gap-1">
+          <Label>Logo de l’entreprise</Label>
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleLogoUpload(file);
+            }}
+          />
+          <p className="text-xs text-muted-foreground">
+            PNG ou JPG – recommandé : fond transparent
+          </p>
+        </div>
+      </div>
+
       <div className="grid md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="companyName">Nom de l'entreprise *</Label>

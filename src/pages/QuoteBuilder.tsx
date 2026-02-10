@@ -11,6 +11,7 @@ import {
   createDefaultSection,
 } from "@/lib/quote-utils";
 import { generateQuotePDF } from "@/lib/pdf-generator";
+import { Input } from "@/components/ui/input";
 import { TradeSelector } from "@/components/quote/TradeSelector";
 import { ClientForm } from "@/components/quote/ClientForm";
 import { CompanyForm } from "@/components/quote/CompanyForm";
@@ -62,15 +63,20 @@ const QuoteBuilder = () => {
   const [quote, setQuote] = useState<Quote | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [selectedSectionId, setSelectedSectionId] = useState<string>("");
-  const [companyExpanded, setCompanyExpanded] = useState(false);
+  const [companyExpanded, setCompanyExpanded] = useState(true);
 
   // Load saved quote on mount
+// Load saved quote on mount
   useEffect(() => {
     try {
       const savedQuote = loadQuoteFromLocal();
       if (savedQuote) {
         setQuote(savedQuote);
-        setTrade(savedQuote.trade);
+
+        // ❗ IMPORTANT :
+        // On NE restaure PAS automatiquement le métier
+        setTrade(null);
+
         if (savedQuote.sections && savedQuote.sections.length > 0) {
           setSelectedSectionId(savedQuote.sections[0].id);
         }
@@ -80,6 +86,7 @@ const QuoteBuilder = () => {
       clearLocalQuote();
     }
   }, []);
+
 
   // Auto-save quote changes
   useEffect(() => {
@@ -324,31 +331,53 @@ const QuoteBuilder = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-6"
               >
-                {/* Trade indicator */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                        trade === "electrician"
-                          ? "bg-blue-500"
-                          : "bg-amber-500"
-                      }`}
-                    >
-                      <Zap className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-semibold">
-                        {trade === "electrician" ? "Électricien" : "Menuisier"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Devis {quote.number}
-                      </p>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={handleReset}>
-                    Changer de métier
-                  </Button>
+                {/* Trade + Title */}
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3 flex-1">
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    trade === "electrician" ? "bg-blue-500" : "bg-amber-500"
+                  }`}
+                >
+                  <Zap className="w-5 h-5 text-white" />
                 </div>
+
+                <div className="flex-1 space-y-1">
+                  <p className="font-semibold">
+                    {trade === "electrician" ? "Électricien" : "Menuisier"}
+                  </p>
+
+                  {/* 🔹 TITRE DU DEVIS */}
+                  <Input
+                    className="h-8 text-sm font-medium"
+                    value={quote.title}
+                    onChange={(e) =>
+                      handleUpdateQuote({ title: e.target.value })
+                    }
+                    placeholder="Titre du devis"
+                  />
+
+                  {/* Numéro de devis */}
+                  {/* Numéro de devis */}
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>Devis</span>
+                      <Input
+                        value={quote.number}
+                        onChange={(e) =>
+                          handleUpdateQuote({ number: e.target.value })
+                        }
+                        className="w-40 h-7 text-xs"
+                        placeholder="DEV-XXXX"
+                      />
+                    </div>
+                </div>
+              </div>
+
+              <Button variant="ghost" size="sm" onClick={handleReset}>
+                Changer de métier
+              </Button>
+            </div>
+
 
                 {/* Main grid */}
                 <div className="grid lg:grid-cols-3 gap-6">

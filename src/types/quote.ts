@@ -17,6 +17,7 @@ export interface CompanyInfo {
   phone: string;
   email: string;
   siret?: string;
+  logo?: string; 
 }
 
 export interface Product {
@@ -48,6 +49,7 @@ export interface QuoteSection {
 
 export interface Quote {
   id: string;
+  title: string;
   number: string;
   date: string;
   validUntil: string;
@@ -76,3 +78,4 @@ export interface QuoteCalculations {
   tva: number;
   totalTTC: number;
 }
+
