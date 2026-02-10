@@ -61,18 +61,23 @@ const QuoteBuilder = () => {
   const [trade, setTrade] = useState<Trade | null>(null);
   const [quote, setQuote] = useState<Quote | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [selectedSectionId, setSelectedSectionId] = useState<string | undefined>(undefined);
+  const [selectedSectionId, setSelectedSectionId] = useState<string>("");
   const [companyExpanded, setCompanyExpanded] = useState(false);
 
   // Load saved quote on mount
   useEffect(() => {
-    const savedQuote = loadQuoteFromLocal();
-    if (savedQuote) {
-      setQuote(savedQuote);
-      setTrade(savedQuote.trade);
-      if (savedQuote.sections.length > 0) {
-        setSelectedSectionId(savedQuote.sections[0].id);
+    try {
+      const savedQuote = loadQuoteFromLocal();
+      if (savedQuote) {
+        setQuote(savedQuote);
+        setTrade(savedQuote.trade);
+        if (savedQuote.sections && savedQuote.sections.length > 0) {
+          setSelectedSectionId(savedQuote.sections[0].id);
+        }
       }
+    } catch (e) {
+      console.error("Error loading saved quote:", e);
+      clearLocalQuote();
     }
   }, []);
 
@@ -85,7 +90,12 @@ const QuoteBuilder = () => {
 
   const calculations = useMemo(() => {
     if (!quote) return null;
-    return calculateQuote(quote);
+    try {
+      return calculateQuote(quote);
+    } catch (e) {
+      console.error("Calculation error:", e);
+      return null;
+    }
   }, [quote]);
 
   const handleTradeSelect = (selectedTrade: Trade) => {
@@ -98,7 +108,7 @@ const QuoteBuilder = () => {
   };
 
   const handleAddProduct = (product: Product, quantity: number, sectionId: string) => {
-    if (!quote) return;
+    if (!quote || !sectionId) return;
 
     const existingItem = quote.items.find(
       (item) => item.product.id === product.id && item.sectionId === sectionId
@@ -124,9 +134,31 @@ const QuoteBuilder = () => {
     }
   };
 
+  const handleAddFreeItem = (sectionId: string, name: string, unitPrice: number, unit: string, quantity: number) => {
+    if (!quote) return;
+    const freeProduct: Product = {
+      id: `free-${crypto.randomUUID()}`,
+      name,
+      category: "Ligne libre",
+      unitPrice,
+      unit,
+      trade: trade!,
+    };
+    const newItem: QuoteItem = {
+      id: crypto.randomUUID(),
+      sectionId,
+      product: freeProduct,
+      quantity,
+      unitPrice,
+      unit,
+      total: unitPrice * quantity,
+      included: true,
+    };
+    setQuote({ ...quote, items: [...quote.items, newItem] });
+  };
+
   const handleUpdateItem = (itemId: string, updates: Partial<QuoteItem>) => {
     if (!quote) return;
-
     setQuote({
       ...quote,
       items: quote.items.map((item) =>
@@ -164,26 +196,20 @@ const QuoteBuilder = () => {
 
   const handleDeleteSection = (sectionId: string) => {
     if (!quote || quote.sections.length <= 1) return;
-
-    // Remove section and its items
+    const newSections = quote.sections.filter((s) => s.id !== sectionId);
     setQuote({
       ...quote,
-      sections: quote.sections.filter((s) => s.id !== sectionId),
+      sections: newSections,
       items: quote.items.filter((item) => item.sectionId !== sectionId),
     });
-
-    // Select another section
-    const remainingSections = quote.sections.filter((s) => s.id !== sectionId);
-    if (remainingSections.length > 0) {
-      setSelectedSectionId(remainingSections[0].id);
+    if (selectedSectionId === sectionId && newSections.length > 0) {
+      setSelectedSectionId(newSections[0].id);
     }
   };
 
   const handleUpdateQuote = (updates: Partial<Quote>) => {
     if (!quote) return;
     setQuote({ ...quote, ...updates });
-
-    // Save company info separately for reuse
     if (updates.companyInfo) {
       saveCompanyInfo(updates.companyInfo);
     }
@@ -207,7 +233,11 @@ const QuoteBuilder = () => {
 
   const handleExportPDF = () => {
     if (!quote || !calculations) return;
-    generateQuotePDF(quote, calculations);
+    try {
+      generateQuotePDF(quote, calculations);
+    } catch (e) {
+      console.error("PDF generation error:", e);
+    }
   };
 
   return (
@@ -231,7 +261,7 @@ const QuoteBuilder = () => {
               </div>
             </div>
 
-            {quote && (
+            {quote && calculations && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground hidden md:inline">
                   {quote.number}
@@ -372,29 +402,33 @@ const QuoteBuilder = () => {
                       <CardHeader className="pb-4">
                         <CardTitle className="flex items-center justify-between text-lg">
                           <span>Ajouter des prestations</span>
-                          <Select
-                            value={selectedSectionId}
-                            onValueChange={setSelectedSectionId}
-                          >
-                            <SelectTrigger className="w-48">
-                              <SelectValue placeholder="Section" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {quote.sections.map((section) => (
-                                <SelectItem key={section.id} value={section.id}>
-                                  {section.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          {quote.sections.length > 0 && (
+                            <Select
+                              value={selectedSectionId || quote.sections[0]?.id || ""}
+                              onValueChange={setSelectedSectionId}
+                            >
+                              <SelectTrigger className="w-48">
+                                <SelectValue placeholder="Section" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {quote.sections.map((section) => (
+                                  <SelectItem key={section.id} value={section.id}>
+                                    {section.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="pt-0">
-                        <ProductCatalog
-                          trade={trade}
-                          sectionId={selectedSectionId}
-                          onAddProduct={handleAddProduct}
-                        />
+                        {selectedSectionId && (
+                          <ProductCatalog
+                            trade={trade}
+                            sectionId={selectedSectionId}
+                            onAddProduct={handleAddProduct}
+                          />
+                        )}
                       </CardContent>
                     </Card>
 
@@ -403,6 +437,7 @@ const QuoteBuilder = () => {
                       items={quote.items}
                       onUpdateItem={handleUpdateItem}
                       onRemoveItem={handleRemoveItem}
+                      onAddFreeItem={handleAddFreeItem}
                     />
 
                     {/* Notes */}

@@ -18,6 +18,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
   ShoppingCart,
   Trash2,
   Minus,
@@ -25,6 +35,7 @@ import {
   ChevronDown,
   ChevronUp,
   FileText,
+  PlusCircle,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/quote-utils";
 
@@ -37,7 +48,7 @@ const UNIT_OPTIONS = [
   { value: "heure", label: "Heure" },
   { value: "jour", label: "Jour" },
   { value: "lot", label: "Lot" },
-  { value: "", label: "Aucune" },
+  { value: "aucune", label: "Aucune" },
 ];
 
 interface QuoteItemsListProps {
@@ -45,6 +56,7 @@ interface QuoteItemsListProps {
   items: QuoteItem[];
   onUpdateItem: (itemId: string, updates: Partial<QuoteItem>) => void;
   onRemoveItem: (itemId: string) => void;
+  onAddFreeItem: (sectionId: string, name: string, unitPrice: number, unit: string, quantity: number) => void;
 }
 
 export const QuoteItemsList = ({
@@ -52,11 +64,17 @@ export const QuoteItemsList = ({
   items,
   onUpdateItem,
   onRemoveItem,
+  onAddFreeItem,
 }: QuoteItemsListProps) => {
   const [expandedSections, setExpandedSections] = useState<string[]>(
     sections.map((s) => s.id)
   );
   const [showDescriptions, setShowDescriptions] = useState<Record<string, boolean>>({});
+  const [freeItemSection, setFreeItemSection] = useState<string | null>(null);
+  const [freeItemName, setFreeItemName] = useState("");
+  const [freeItemPrice, setFreeItemPrice] = useState("");
+  const [freeItemUnit, setFreeItemUnit] = useState("unité");
+  const [freeItemQty, setFreeItemQty] = useState("1");
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) =>
@@ -103,6 +121,22 @@ export const QuoteItemsList = ({
     }
   };
 
+  const handleAddFreeItem = () => {
+    if (!freeItemSection || !freeItemName.trim()) return;
+    onAddFreeItem(
+      freeItemSection,
+      freeItemName.trim(),
+      parseFloat(freeItemPrice) || 0,
+      freeItemUnit === "aucune" ? "" : freeItemUnit,
+      parseFloat(freeItemQty) || 1
+    );
+    setFreeItemName("");
+    setFreeItemPrice("");
+    setFreeItemUnit("unité");
+    setFreeItemQty("1");
+    setFreeItemSection(null);
+  };
+
   return (
     <Card>
       <CardHeader className="pb-4">
@@ -145,7 +179,7 @@ export const QuoteItemsList = ({
               <CollapsibleContent className="pt-2 space-y-2">
                 {sectionItems.length === 0 ? (
                   <p className="text-center text-muted-foreground py-4 text-sm">
-                    Aucune ligne. Ajoutez des produits depuis le catalogue.
+                    Aucune ligne. Ajoutez des produits depuis le catalogue ou une ligne libre.
                   </p>
                 ) : (
                   sectionItems.map((item) => (
@@ -172,13 +206,26 @@ export const QuoteItemsList = ({
                         {/* Product info */}
                         <div className="flex-1 min-w-0 space-y-2">
                           <div className="flex items-center justify-between gap-2">
-                            <p
-                              className={`font-medium truncate ${
-                                !item.included ? "line-through" : ""
-                              }`}
-                            >
-                              {item.product.name}
-                            </p>
+                            {item.product.id.startsWith("free-") ? (
+                              <Input
+                                value={item.product.name}
+                                onChange={(e) =>
+                                  onUpdateItem(item.id, {
+                                    product: { ...item.product, name: e.target.value },
+                                  })
+                                }
+                                className={`font-medium h-8 text-sm ${!item.included ? "line-through" : ""}`}
+                                placeholder="Nom de la prestation"
+                              />
+                            ) : (
+                              <p
+                                className={`font-medium truncate ${
+                                  !item.included ? "line-through" : ""
+                                }`}
+                              >
+                                {item.product.name}
+                              </p>
+                            )}
                             <Button
                               variant="ghost"
                               size="icon"
@@ -193,9 +240,9 @@ export const QuoteItemsList = ({
                           <div className="flex flex-wrap items-center gap-2">
                             {/* Unit selector */}
                             <Select
-                              value={item.unit}
+                              value={item.unit || "aucune"}
                               onValueChange={(value) =>
-                                onUpdateItem(item.id, { unit: value })
+                                onUpdateItem(item.id, { unit: value === "aucune" ? "" : value })
                               }
                             >
                               <SelectTrigger className="w-24 h-8 text-xs">
@@ -237,7 +284,7 @@ export const QuoteItemsList = ({
                                 onClick={() =>
                                   handleQuantityChange(
                                     item.id,
-                                    Math.max(1, item.quantity - 1)
+                                    Math.max(0.01, item.quantity - 1)
                                   )
                                 }
                               >
@@ -245,7 +292,7 @@ export const QuoteItemsList = ({
                               </Button>
                               <Input
                                 type="number"
-                                min="1"
+                                min="0.01"
                                 step="0.01"
                                 value={item.quantity}
                                 onChange={(e) =>
@@ -303,6 +350,84 @@ export const QuoteItemsList = ({
                     </div>
                   ))
                 )}
+
+                {/* Add free line button */}
+                <Dialog open={freeItemSection === section.id} onOpenChange={(open) => {
+                  if (!open) setFreeItemSection(null);
+                }}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full text-muted-foreground hover:text-foreground"
+                      onClick={() => setFreeItemSection(section.id)}
+                    >
+                      <PlusCircle className="w-4 h-4 mr-2" />
+                      Ajouter une ligne libre
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Ajouter une ligne libre</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label>Désignation *</Label>
+                        <Input
+                          placeholder="Nom de la prestation"
+                          value={freeItemName}
+                          onChange={(e) => setFreeItemName(e.target.value)}
+                        />
+                      </div>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="space-y-2">
+                          <Label>Prix unitaire (€)</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            value={freeItemPrice}
+                            onChange={(e) => setFreeItemPrice(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Quantité</Label>
+                          <Input
+                            type="number"
+                            min="0.01"
+                            step="0.01"
+                            value={freeItemQty}
+                            onChange={(e) => setFreeItemQty(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Unité</Label>
+                          <Select value={freeItemUnit} onValueChange={setFreeItemUnit}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {UNIT_OPTIONS.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="outline">Annuler</Button>
+                      </DialogClose>
+                      <Button onClick={handleAddFreeItem} disabled={!freeItemName.trim()}>
+                        Ajouter
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </CollapsibleContent>
             </Collapsible>
           );
@@ -310,7 +435,7 @@ export const QuoteItemsList = ({
 
         {items.length === 0 && (
           <p className="text-center text-muted-foreground py-8">
-            Aucune prestation ajoutée. Utilisez le catalogue ci-dessus.
+            Aucune prestation ajoutée. Utilisez le catalogue ci-dessus ou ajoutez une ligne libre.
           </p>
         )}
       </CardContent>

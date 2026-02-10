@@ -6,8 +6,8 @@ export const calculateQuote = (quote: Quote): QuoteCalculations => {
     .filter(item => item.included)
     .reduce((sum, item) => sum + item.total, 0);
   
-  // Coût main d'œuvre (seulement si visible)
-  const laborCost = quote.laborVisible ? quote.laborHours * quote.laborRate : 0;
+  // Coût main d'œuvre (toujours calculé si heures > 0)
+  const laborCost = quote.laborHours * quote.laborRate;
   
   // Sous-total HT (avant marge)
   const subtotalHT = subtotalProducts + laborCost;
@@ -110,7 +110,7 @@ export const createEmptyQuote = (trade: "electrician" | "carpenter"): Quote => {
     laborHours: 0,
     laborRate: 45,
     laborVisible: true,
-    marginPercent: 20,
+    marginPercent: 0,
     discountPercent: 0,
     tvaRate: 20,
     notes: "",
