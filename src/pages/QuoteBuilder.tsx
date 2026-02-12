@@ -12,7 +12,9 @@ import {
   saveCompanyInfo,
   createDefaultSection,
 } from "@/lib/quote-utils";
+import { saveQuoteToHistory, getNextQuoteNumber } from "@/lib/quote-storage";
 import { generateQuotePDF } from "@/lib/pdf-generator";
+import { FeedbackButton } from "@/components/quote/FeedbackButton";
 import { Input } from "@/components/ui/input";
 import { TradeSelector } from "@/components/quote/TradeSelector";
 import { ClientForm } from "@/components/quote/ClientForm";
@@ -57,6 +59,7 @@ import {
   RefreshCw,
   ChevronDown,
   Building2,
+  History,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -90,10 +93,11 @@ const QuoteBuilder = () => {
   }, []);
 
 
-  // Auto-save quote changes
+  // Auto-save quote changes + history
   useEffect(() => {
     if (quote) {
       saveQuoteToLocal(quote);
+      saveQuoteToHistory(quote);
     }
   }, [quote]);
 
@@ -226,8 +230,11 @@ const QuoteBuilder = () => {
 
   const handleNewQuote = () => {
     if (!trade) return;
+    // Save current to history before creating new
+    if (quote) saveQuoteToHistory(quote);
     clearLocalQuote();
     const newQuote = createEmptyQuote(trade);
+    newQuote.number = getNextQuoteNumber();
     setQuote(newQuote);
     if (newQuote.sections.length > 0) {
       setSelectedSectionId(newQuote.sections[0].id);
@@ -275,6 +282,13 @@ const QuoteBuilder = () => {
                 <span className="text-sm text-muted-foreground hidden md:inline">
                   {quote.number}
                 </span>
+                <Button variant="ghost" size="sm" asChild className="hidden sm:flex">
+                  <Link to="/mes-devis">
+                    <History className="w-4 h-4 mr-1" />
+                    Mes devis
+                  </Link>
+                </Button>
+                <FeedbackButton />
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="outline" size="sm">
@@ -286,8 +300,8 @@ const QuoteBuilder = () => {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Nouveau devis ?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Cette action réinitialisera le devis en cours. Les informations
-                        de votre entreprise seront conservées.
+                        Le devis actuel sera sauvegardé dans l'historique.
+                        Les informations de votre entreprise seront conservées.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
