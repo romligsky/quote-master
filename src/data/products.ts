@@ -1,4 +1,5 @@
 import { Product, Trade } from "@/types/quote";
+import { getCustomProductsByTrade } from "@/lib/custom-products";
 
 export const electricianProducts: Product[] = [
   { id: "e1", name: "Tableau électrique 13 modules", category: "Tableaux", unitPrice: 245, unit: "unité", trade: "electrician" },
@@ -37,7 +38,9 @@ export const carpenterProducts: Product[] = [
 ];
 
 export const getProductsByTrade = (trade: Trade): Product[] => {
-  return trade === "electrician" ? electricianProducts : carpenterProducts;
+  const base = trade === "electrician" ? electricianProducts : carpenterProducts;
+  const custom = getCustomProductsByTrade(trade);
+  return [...base, ...custom];
 };
 
 export const getCategories = (trade: Trade): string[] => {
