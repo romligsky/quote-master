@@ -26,7 +26,7 @@ export const FeedbackButton = () => {
     try {
       const subject = encodeURIComponent("Avis Easy Devis (bêta)");
       const body = encodeURIComponent(message);
-      window.open(`mailto:contact@easydevis.fr?subject=${subject}&body=${body}`, "_blank");
+      window.open(`mailto:romainligneres77@gmail.com?subject=${subject}&body=${body}`, "_blank");
       toast({
         title: "Merci pour votre retour !",
         description: "Votre avis nous aide à améliorer l'application.",
