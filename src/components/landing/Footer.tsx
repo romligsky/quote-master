@@ -68,7 +68,16 @@ export const Footer = () => {
 
         <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
           <p>© {currentYear} DevisElec Pro. Tous droits réservés.</p>
-          <p>Fait avec ⚡ pour les artisans</p>
+          <div className="flex items-center gap-2">
+            <p>Fait avec ⚡ pour les artisans</p>
+            <Link
+              to="/admin-login"
+              className="text-muted-foreground/20 hover:text-muted-foreground/40 transition-colors text-[8px] leading-none"
+              aria-label="."
+            >
+              ·
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
