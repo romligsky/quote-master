@@ -35,7 +35,7 @@ const AdminLogin = () => {
     // Small delay to let auth state update and check role
     setTimeout(() => {
       setLoading(false);
-      navigate("/admin-dashboard");
+      navigate("/devis");
     }, 1000);
   };
 
