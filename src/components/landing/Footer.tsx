@@ -71,7 +71,7 @@ export const Footer = () => {
             © {currentYear} DevisElec Pro. Tous droits réservés.
             <Link
               to="/admin/login"
-              className="text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors select-none ml-1 text-[10px]"
+              className="text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors select-none ml-2 text-xs"
               tabIndex={-1}
             >*</Link>
           </p>
