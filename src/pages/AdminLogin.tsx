@@ -1,77 +1,91 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lock, AlertCircle } from "lucide-react";
+import { Lock } from "lucide-react";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { signIn, isAdmin, user } = useAuth();
+  const [error, setError] = useState(false);
+  const { login, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
 
-  // If already logged in as admin, redirect
-  if (user && isAdmin) {
-    navigate("/devis", { replace: true });
-    return null;
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    const { error: signInError } = await signIn(email, password);
-    if (signInError) {
-      setError("Email ou mot de passe incorrect");
-      setLoading(false);
-      return;
-    }
-
-    // Small delay to let auth state update and check role
-    setTimeout(() => {
-      setLoading(false);
+    const ok = login(username, password);
+    if (ok) {
       navigate("/devis");
-    }, 1000);
+    } else {
+      setError(true);
+    }
   };
 
+  if (isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/30">
+        <Card className="w-full max-w-sm">
+          <CardHeader className="text-center">
+            <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2">
+              <Lock className="w-6 h-6 text-green-600" />
+            </div>
+            <CardTitle>Connecté en tant qu'admin</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button className="w-full" onClick={() => navigate("/devis")}>
+              Créer un devis Web
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => { logout(); navigate("/"); }}
+            >
+              Se déconnecter
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-muted/30">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
             <Lock className="w-6 h-6 text-primary" />
           </div>
-          <CardTitle className="text-lg">Administration</CardTitle>
+          <CardTitle>Accès admin</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1">
+              <Label htmlFor="username">Identifiant</Label>
+              <Input
+                id="username"
+                value={username}
+                onChange={(e) => { setUsername(e.target.value); setError(false); }}
+                autoComplete="username"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="password">Mot de passe</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); setError(false); }}
+                autoComplete="current-password"
+              />
+            </div>
             {error && (
-              <div className="flex items-center gap-2 text-destructive text-sm bg-destructive/10 p-3 rounded-lg">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                {error}
-              </div>
+              <p className="text-sm text-destructive">Identifiants incorrects.</p>
             )}
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <Input
-              type="password"
-              placeholder="Mot de passe"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Connexion..." : "Se connecter"}
+            <Button type="submit" className="w-full">
+              Se connecter
             </Button>
           </form>
         </CardContent>

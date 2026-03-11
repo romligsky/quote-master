@@ -78,7 +78,7 @@ export const createDefaultSection = (name: string = "Prestations", order: number
   order,
 });
 
-export const createEmptyQuote = (trade: "electrician" | "carpenter" | "webdev"): Quote => {
+export const createEmptyQuote = (trade: "electrician" | "carpenter" | "webagency"): Quote => {
   const today = new Date();
   const validUntil = new Date(today);
   validUntil.setDate(validUntil.getDate() + 30);

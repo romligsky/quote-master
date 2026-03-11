@@ -1,4 +1,4 @@
-export type Trade = "electrician" | "carpenter" | "webdev";
+export type Trade = "electrician" | "carpenter" | "webagency";
 
 export interface Client {
   name: string;

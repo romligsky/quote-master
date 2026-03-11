@@ -1,24 +1,21 @@
 import { motion } from "framer-motion";
 import { Zap, Hammer, Globe } from "lucide-react";
 import { Trade } from "@/types/quote";
-import { useAuth } from "@/hooks/useAuth";
 
 interface TradeSelectorProps {
   selectedTrade: Trade | null;
   onSelect: (trade: Trade) => void;
+  adminMode?: boolean;
 }
 
-export const TradeSelector = ({ selectedTrade, onSelect }: TradeSelectorProps) => {
-  const { isAdmin } = useAuth();
-
-  const trades = [
+export const TradeSelector = ({ selectedTrade, onSelect, adminMode = false }: TradeSelectorProps) => {
+  const publicTrades = [
     {
       id: "electrician" as Trade,
       name: "Électricien",
       icon: Zap,
       description: "Tableaux, câblage, appareillage...",
       color: "from-blue-500 to-blue-600",
-      adminOnly: false,
     },
     {
       id: "carpenter" as Trade,
@@ -26,28 +23,35 @@ export const TradeSelector = ({ selectedTrade, onSelect }: TradeSelectorProps) =
       icon: Hammer,
       description: "Portes, fenêtres, parquet...",
       color: "from-amber-500 to-amber-600",
-      adminOnly: false,
     },
+  ];
+
+  const adminTrades = [
     {
-      id: "webdev" as Trade,
-      name: "Création Web",
+      id: "webagency" as Trade,
+      name: "Web Agency",
       icon: Globe,
-      description: "Sites, SEO, maintenance, design...",
-      color: "from-violet-500 to-violet-600",
-      adminOnly: true,
+      description: "Sites web, e-commerce, SEO, design...",
+      color: "from-purple-500 to-purple-600",
     },
-  ].filter((t) => !t.adminOnly || isAdmin);
+  ];
+
+  const trades = adminMode ? adminTrades : publicTrades;
 
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold mb-2">Sélectionnez votre métier</h2>
+        <h2 className="text-2xl font-bold mb-2">
+          {adminMode ? "Créer un devis Web" : "Sélectionnez votre métier"}
+        </h2>
         <p className="text-muted-foreground">
-          Le catalogue sera adapté à votre activité
+          {adminMode
+            ? "Devis pour la vente de services web"
+            : "Le catalogue sera adapté à votre activité"}
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className={`grid gap-4 ${adminMode ? "max-w-sm mx-auto" : "md:grid-cols-2"}`}>
         {trades.map((trade) => (
           <motion.button
             key={trade.id}

@@ -1,5 +1,4 @@
 import { Product, Trade } from "@/types/quote";
-import { getCustomProductsByTrade } from "@/lib/custom-products";
 
 export const electricianProducts: Product[] = [
   { id: "e1", name: "Tableau électrique 13 modules", category: "Tableaux", unitPrice: 245, unit: "unité", trade: "electrician" },
@@ -37,43 +36,36 @@ export const carpenterProducts: Product[] = [
   { id: "c15", name: "Garde-corps bois", category: "Escaliers", unitPrice: 180, unit: "mètre", trade: "carpenter" },
 ];
 
-export const webdevProducts: Product[] = [
-  { id: "w1", name: "Site vitrine (1-5 pages)", category: "Création de site", unitPrice: 1200, unit: "forfait", trade: "webdev" },
-  { id: "w2", name: "Site vitrine (6-10 pages)", category: "Création de site", unitPrice: 2000, unit: "forfait", trade: "webdev" },
-  { id: "w3", name: "Site e-commerce", category: "Création de site", unitPrice: 3500, unit: "forfait", trade: "webdev" },
-  { id: "w4", name: "Landing page", category: "Création de site", unitPrice: 600, unit: "forfait", trade: "webdev" },
-  { id: "w5", name: "Refonte site existant", category: "Création de site", unitPrice: 1500, unit: "forfait", trade: "webdev" },
-  { id: "w6", name: "Page supplémentaire", category: "Création de site", unitPrice: 200, unit: "page", trade: "webdev" },
-  { id: "w7", name: "Audit SEO complet", category: "SEO", unitPrice: 500, unit: "forfait", trade: "webdev" },
-  { id: "w8", name: "Optimisation SEO on-page", category: "SEO", unitPrice: 300, unit: "forfait", trade: "webdev" },
-  { id: "w9", name: "Rédaction SEO (article)", category: "SEO", unitPrice: 150, unit: "article", trade: "webdev" },
-  { id: "w10", name: "Stratégie de mots-clés", category: "SEO", unitPrice: 400, unit: "forfait", trade: "webdev" },
-  { id: "w11", name: "Netlinking (backlinks)", category: "SEO", unitPrice: 80, unit: "lien", trade: "webdev" },
-  { id: "w12", name: "Maintenance mensuelle", category: "Maintenance", unitPrice: 150, unit: "mois", trade: "webdev" },
-  { id: "w13", name: "Hébergement + nom de domaine", category: "Maintenance", unitPrice: 20, unit: "mois", trade: "webdev" },
-  { id: "w14", name: "Mise à jour sécurité", category: "Maintenance", unitPrice: 100, unit: "intervention", trade: "webdev" },
-  { id: "w15", name: "Sauvegarde & restauration", category: "Maintenance", unitPrice: 50, unit: "mois", trade: "webdev" },
-  { id: "w16", name: "Logo & identité visuelle", category: "Design", unitPrice: 500, unit: "forfait", trade: "webdev" },
-  { id: "w17", name: "Charte graphique", category: "Design", unitPrice: 800, unit: "forfait", trade: "webdev" },
-  { id: "w18", name: "Maquette UI/UX", category: "Design", unitPrice: 400, unit: "page", trade: "webdev" },
-  { id: "w19", name: "Création Google My Business", category: "Marketing", unitPrice: 200, unit: "forfait", trade: "webdev" },
-  { id: "w20", name: "Campagne Google Ads (setup)", category: "Marketing", unitPrice: 350, unit: "forfait", trade: "webdev" },
-  { id: "w21", name: "Gestion réseaux sociaux", category: "Marketing", unitPrice: 300, unit: "mois", trade: "webdev" },
-  { id: "w22", name: "Formation WordPress", category: "Formation", unitPrice: 400, unit: "session", trade: "webdev" },
-  { id: "w23", name: "Formation gestion de contenu", category: "Formation", unitPrice: 250, unit: "session", trade: "webdev" },
-  { id: "w24", name: "Automatisation (Zapier/Make)", category: "Automatisation", unitPrice: 500, unit: "forfait", trade: "webdev" },
+export const webAgencyProducts: Product[] = [
+  { id: "w1", name: "Site vitrine 1 page (landing)", category: "Création de site", unitPrice: 500, unit: "forfait", trade: "webagency" },
+  { id: "w2", name: "Site vitrine 3-5 pages", category: "Création de site", unitPrice: 1200, unit: "forfait", trade: "webagency" },
+  { id: "w3", name: "Site vitrine > 10 pages", category: "Création de site", unitPrice: 2500, unit: "forfait", trade: "webagency" },
+  { id: "w4", name: "Site e-commerce (jusqu'à 50 produits)", category: "E-commerce", unitPrice: 2000, unit: "forfait", trade: "webagency" },
+  { id: "w5", name: "Site e-commerce (jusqu'à 200 produits)", category: "E-commerce", unitPrice: 4000, unit: "forfait", trade: "webagency" },
+  { id: "w6", name: "Site e-commerce (produits illimités)", category: "E-commerce", unitPrice: 7000, unit: "forfait", trade: "webagency" },
+  { id: "w7", name: "Création logo", category: "Design", unitPrice: 350, unit: "forfait", trade: "webagency" },
+  { id: "w8", name: "Charte graphique complète", category: "Design", unitPrice: 800, unit: "forfait", trade: "webagency" },
+  { id: "w9", name: "Refonte graphique", category: "Design", unitPrice: 600, unit: "forfait", trade: "webagency" },
+  { id: "w10", name: "Optimisation SEO on-page", category: "SEO & Marketing", unitPrice: 400, unit: "forfait", trade: "webagency" },
+  { id: "w11", name: "Rédaction de contenu", category: "SEO & Marketing", unitPrice: 80, unit: "page", trade: "webagency" },
+  { id: "w12", name: "Campagne Google Ads (setup)", category: "SEO & Marketing", unitPrice: 300, unit: "forfait", trade: "webagency" },
+  { id: "w13", name: "Maintenance mensuelle", category: "Maintenance & Support", unitPrice: 50, unit: "mois", trade: "webagency" },
+  { id: "w14", name: "Support technique (par heure)", category: "Maintenance & Support", unitPrice: 70, unit: "heure", trade: "webagency" },
+  { id: "w15", name: "Mise à jour de contenu", category: "Maintenance & Support", unitPrice: 40, unit: "heure", trade: "webagency" },
+  { id: "w16", name: "Hébergement annuel", category: "Hébergement & Domaine", unitPrice: 120, unit: "an", trade: "webagency" },
+  { id: "w17", name: "Nom de domaine", category: "Hébergement & Domaine", unitPrice: 15, unit: "an", trade: "webagency" },
+  { id: "w18", name: "Certificat SSL", category: "Hébergement & Domaine", unitPrice: 60, unit: "an", trade: "webagency" },
+  { id: "w19", name: "Formulaire de contact avancé", category: "Fonctionnalités", unitPrice: 150, unit: "forfait", trade: "webagency" },
+  { id: "w20", name: "Blog / actualités", category: "Fonctionnalités", unitPrice: 300, unit: "forfait", trade: "webagency" },
+  { id: "w21", name: "Newsletter (setup)", category: "Fonctionnalités", unitPrice: 200, unit: "forfait", trade: "webagency" },
+  { id: "w22", name: "Intégration API tierce", category: "Fonctionnalités", unitPrice: 500, unit: "forfait", trade: "webagency" },
+  { id: "w23", name: "Formation CMS (Wordpress, etc.)", category: "Formation", unitPrice: 150, unit: "heure", trade: "webagency" },
 ];
 
 export const getProductsByTrade = (trade: Trade): Product[] => {
-  let base: Product[];
-  switch (trade) {
-    case "electrician": base = electricianProducts; break;
-    case "carpenter": base = carpenterProducts; break;
-    case "webdev": base = webdevProducts; break;
-    default: base = [];
-  }
-  const custom = getCustomProductsByTrade(trade);
-  return [...base, ...custom];
+  if (trade === "electrician") return electricianProducts;
+  if (trade === "carpenter") return carpenterProducts;
+  return webAgencyProducts;
 };
 
 export const getCategories = (trade: Trade): string[] => {
