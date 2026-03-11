@@ -390,7 +390,7 @@ const QuoteBuilder = () => {
 
                     <div className="flex-1 space-y-1 min-w-0">
                       <p className="font-semibold text-sm sm:text-base">
-                        {trade === "electrician" ? "Électricien" : "Menuisier"}
+                        {trade === "electrician" ? "Électricien" : trade === "carpenter" ? "Menuisier" : "Création Web"}
                       </p>
 
                       {/* 🔹 TITRE DU DEVIS */}

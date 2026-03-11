@@ -16,7 +16,7 @@ const AdminLogin = () => {
 
   // If already logged in as admin, redirect
   if (user && isAdmin) {
-    navigate("/admin-dashboard", { replace: true });
+    navigate("/devis", { replace: true });
     return null;
   }
 
@@ -35,7 +35,7 @@ const AdminLogin = () => {
     // Small delay to let auth state update and check role
     setTimeout(() => {
       setLoading(false);
-      navigate("/admin-dashboard");
+      navigate("/devis");
     }, 1000);
   };
 
