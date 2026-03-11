@@ -16,7 +16,7 @@ const AdminLogin = () => {
 
   // If already logged in as admin, redirect
   if (user && isAdmin) {
-    navigate("/admin-dashboard", { replace: true });
+    navigate("/devis", { replace: true });
     return null;
   }
 

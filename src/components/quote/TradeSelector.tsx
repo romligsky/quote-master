@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { Zap, Hammer } from "lucide-react";
+import { Zap, Hammer, Globe } from "lucide-react";
 import { Trade } from "@/types/quote";
+import { useAuth } from "@/hooks/useAuth";
 
 interface TradeSelectorProps {
   selectedTrade: Trade | null;
@@ -8,6 +9,8 @@ interface TradeSelectorProps {
 }
 
 export const TradeSelector = ({ selectedTrade, onSelect }: TradeSelectorProps) => {
+  const { isAdmin } = useAuth();
+
   const trades = [
     {
       id: "electrician" as Trade,
@@ -15,6 +18,7 @@ export const TradeSelector = ({ selectedTrade, onSelect }: TradeSelectorProps) =
       icon: Zap,
       description: "Tableaux, câblage, appareillage...",
       color: "from-blue-500 to-blue-600",
+      adminOnly: false,
     },
     {
       id: "carpenter" as Trade,
@@ -22,8 +26,17 @@ export const TradeSelector = ({ selectedTrade, onSelect }: TradeSelectorProps) =
       icon: Hammer,
       description: "Portes, fenêtres, parquet...",
       color: "from-amber-500 to-amber-600",
+      adminOnly: false,
     },
-  ];
+    {
+      id: "webdev" as Trade,
+      name: "Création Web",
+      icon: Globe,
+      description: "Sites, SEO, maintenance, design...",
+      color: "from-violet-500 to-violet-600",
+      adminOnly: true,
+    },
+  ].filter((t) => !t.adminOnly || isAdmin);
 
   return (
     <div className="space-y-6">

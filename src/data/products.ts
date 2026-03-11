@@ -37,8 +37,41 @@ export const carpenterProducts: Product[] = [
   { id: "c15", name: "Garde-corps bois", category: "Escaliers", unitPrice: 180, unit: "mètre", trade: "carpenter" },
 ];
 
+export const webdevProducts: Product[] = [
+  { id: "w1", name: "Site vitrine (1-5 pages)", category: "Création de site", unitPrice: 1200, unit: "forfait", trade: "webdev" },
+  { id: "w2", name: "Site vitrine (6-10 pages)", category: "Création de site", unitPrice: 2000, unit: "forfait", trade: "webdev" },
+  { id: "w3", name: "Site e-commerce", category: "Création de site", unitPrice: 3500, unit: "forfait", trade: "webdev" },
+  { id: "w4", name: "Landing page", category: "Création de site", unitPrice: 600, unit: "forfait", trade: "webdev" },
+  { id: "w5", name: "Refonte site existant", category: "Création de site", unitPrice: 1500, unit: "forfait", trade: "webdev" },
+  { id: "w6", name: "Page supplémentaire", category: "Création de site", unitPrice: 200, unit: "page", trade: "webdev" },
+  { id: "w7", name: "Audit SEO complet", category: "SEO", unitPrice: 500, unit: "forfait", trade: "webdev" },
+  { id: "w8", name: "Optimisation SEO on-page", category: "SEO", unitPrice: 300, unit: "forfait", trade: "webdev" },
+  { id: "w9", name: "Rédaction SEO (article)", category: "SEO", unitPrice: 150, unit: "article", trade: "webdev" },
+  { id: "w10", name: "Stratégie de mots-clés", category: "SEO", unitPrice: 400, unit: "forfait", trade: "webdev" },
+  { id: "w11", name: "Netlinking (backlinks)", category: "SEO", unitPrice: 80, unit: "lien", trade: "webdev" },
+  { id: "w12", name: "Maintenance mensuelle", category: "Maintenance", unitPrice: 150, unit: "mois", trade: "webdev" },
+  { id: "w13", name: "Hébergement + nom de domaine", category: "Maintenance", unitPrice: 20, unit: "mois", trade: "webdev" },
+  { id: "w14", name: "Mise à jour sécurité", category: "Maintenance", unitPrice: 100, unit: "intervention", trade: "webdev" },
+  { id: "w15", name: "Sauvegarde & restauration", category: "Maintenance", unitPrice: 50, unit: "mois", trade: "webdev" },
+  { id: "w16", name: "Logo & identité visuelle", category: "Design", unitPrice: 500, unit: "forfait", trade: "webdev" },
+  { id: "w17", name: "Charte graphique", category: "Design", unitPrice: 800, unit: "forfait", trade: "webdev" },
+  { id: "w18", name: "Maquette UI/UX", category: "Design", unitPrice: 400, unit: "page", trade: "webdev" },
+  { id: "w19", name: "Création Google My Business", category: "Marketing", unitPrice: 200, unit: "forfait", trade: "webdev" },
+  { id: "w20", name: "Campagne Google Ads (setup)", category: "Marketing", unitPrice: 350, unit: "forfait", trade: "webdev" },
+  { id: "w21", name: "Gestion réseaux sociaux", category: "Marketing", unitPrice: 300, unit: "mois", trade: "webdev" },
+  { id: "w22", name: "Formation WordPress", category: "Formation", unitPrice: 400, unit: "session", trade: "webdev" },
+  { id: "w23", name: "Formation gestion de contenu", category: "Formation", unitPrice: 250, unit: "session", trade: "webdev" },
+  { id: "w24", name: "Automatisation (Zapier/Make)", category: "Automatisation", unitPrice: 500, unit: "forfait", trade: "webdev" },
+];
+
 export const getProductsByTrade = (trade: Trade): Product[] => {
-  const base = trade === "electrician" ? electricianProducts : carpenterProducts;
+  let base: Product[];
+  switch (trade) {
+    case "electrician": base = electricianProducts; break;
+    case "carpenter": base = carpenterProducts; break;
+    case "webdev": base = webdevProducts; break;
+    default: base = [];
+  }
   const custom = getCustomProductsByTrade(trade);
   return [...base, ...custom];
 };
