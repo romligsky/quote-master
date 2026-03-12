@@ -225,6 +225,26 @@ export const QuotePreview = ({
             </div>
           </div>
 
+          {/* Assurance maintenance (option, non incluse dans le total) */}
+          {quote.maintenanceInsurance?.enabled && (
+            <div className="mt-6 border border-dashed border-gray-300 rounded-lg p-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="font-medium text-gray-800">Option : Assurance maintenance</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Couverture bugs &amp; mises à jour mineures — non incluse dans le total
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold text-gray-800">
+                    {quote.maintenanceInsurance.price} €<span className="text-xs font-normal text-gray-500"> / mois</span>
+                  </p>
+                  <p className="text-xs text-gray-400 italic">option facultative</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Notes */}
           {quote.notes && (
             <div className="mt-8 p-4 bg-gray-50 rounded-lg">

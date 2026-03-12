@@ -259,6 +259,43 @@ export const generateQuotePDF = async (
   doc.setTextColor(0, 0, 0);
 
   /* =========================
+     ASSURANCE MAINTENANCE (option, non incluse dans le total)
+  ========================= */
+  if (quote.maintenanceInsurance?.enabled) {
+    y += 8;
+    if (y > 260) { doc.addPage(); y = 20; }
+
+    // Bordure en tirets
+    doc.setDrawColor(180, 180, 180);
+    doc.setLineDashPattern([2, 2], 0);
+    doc.roundedRect(margin, y - 2, contentWidth, 16, 2, 2);
+    doc.setLineDashPattern([], 0);
+
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(60, 60, 60);
+    doc.text("Option : Assurance maintenance", margin + 4, y + 5);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(120, 120, 120);
+    doc.text("Couverture bugs & mises à jour mineures — non incluse dans le total", margin + 4, y + 10);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(60, 60, 60);
+    doc.text(`${quote.maintenanceInsurance.price} €/mois`, pageWidth - margin - 4, y + 5, { align: "right" });
+
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(7.5);
+    doc.setTextColor(150, 150, 150);
+    doc.text("option facultative", pageWidth - margin - 4, y + 10, { align: "right" });
+
+    doc.setTextColor(0, 0, 0);
+    y += 20;
+  }
+
+  /* =========================
      NOTES
   ========================= */
   if (quote.notes) {
