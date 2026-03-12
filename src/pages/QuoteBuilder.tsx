@@ -15,6 +15,8 @@ import {
 } from "@/lib/quote-utils";
 import { generateQuotePDF } from "@/lib/pdf-generator";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { TradeSelector } from "@/components/quote/TradeSelector";
 import { ClientForm } from "@/components/quote/ClientForm";
 import { CompanyForm } from "@/components/quote/CompanyForm";
@@ -61,6 +63,7 @@ import {
   ChevronDown,
   Building2,
   LogOut,
+  ShieldCheck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -512,6 +515,75 @@ const QuoteBuilder = () => {
                         />
                       </CardContent>
                     </Card>
+
+                    {/* Assurance maintenance — visible admin webagency uniquement, jamais dans le devis */}
+                    {isAdmin && trade === "webagency" && (
+                      <Card className="border-purple-200 bg-purple-50/40">
+                        <CardHeader className="pb-4">
+                          <CardTitle className="flex items-center gap-2 text-lg text-purple-700">
+                            <ShieldCheck className="w-5 h-5" />
+                            Assurance maintenance
+                            <span className="ml-auto text-xs font-normal text-purple-400 border border-purple-200 rounded px-2 py-0.5">
+                              Interne · non visible sur le devis
+                            </span>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <Label htmlFor="insurance-toggle" className="text-sm font-medium">
+                                Proposer l'assurance au client
+                              </Label>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                Couverture bugs & mises à jour mineures
+                              </p>
+                            </div>
+                            <Switch
+                              id="insurance-toggle"
+                              checked={quote.maintenanceInsurance?.enabled ?? false}
+                              onCheckedChange={(checked) =>
+                                handleUpdateQuote({
+                                  maintenanceInsurance: {
+                                    enabled: checked,
+                                    price: quote.maintenanceInsurance?.price ?? 50,
+                                  },
+                                })
+                              }
+                            />
+                          </div>
+
+                          {quote.maintenanceInsurance?.enabled && (
+                            <div className="pt-2 border-t border-purple-200 space-y-3">
+                              <div className="flex items-center gap-3">
+                                <Label className="text-sm w-32 shrink-0">Prix mensuel</Label>
+                                <div className="flex items-center gap-2 flex-1">
+                                  <Input
+                                    type="number"
+                                    min={50}
+                                    max={150}
+                                    step={5}
+                                    value={quote.maintenanceInsurance.price}
+                                    onChange={(e) =>
+                                      handleUpdateQuote({
+                                        maintenanceInsurance: {
+                                          enabled: true,
+                                          price: Math.min(150, Math.max(50, Number(e.target.value))),
+                                        },
+                                      })
+                                    }
+                                    className="w-24 border-purple-200"
+                                  />
+                                  <span className="text-sm text-muted-foreground">€ / mois</span>
+                                </div>
+                              </div>
+                              <div className="text-xs text-purple-600 bg-purple-100 rounded p-2">
+                                💡 Le client paiera <strong>{quote.maintenanceInsurance.price} €/mois</strong> — ce montant n'apparaît pas sur le devis PDF.
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
                   </div>
 
                   {/* Right column - Summary */}

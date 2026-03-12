@@ -47,6 +47,11 @@ export interface QuoteSection {
   order: number;
 }
 
+export interface MaintenanceInsurance {
+  enabled: boolean;
+  price: number; // €/mois, entre 50 et 150
+}
+
 export interface Quote {
   id: string;
   title: string;
@@ -65,6 +70,7 @@ export interface Quote {
   discountPercent: number;
   tvaRate: number;
   notes: string;
+  maintenanceInsurance?: MaintenanceInsurance; // interne admin uniquement, jamais affiché dans le devis
 }
 
 export interface QuoteCalculations {

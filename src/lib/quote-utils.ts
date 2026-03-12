@@ -110,7 +110,7 @@ export const createEmptyQuote = (trade: "electrician" | "carpenter" | "webagency
       postalCode: "",
     },
     companyInfo,
-    sections: [createDefaultSection("Travaux", 0)],
+    sections: [createDefaultSection(trade === "webagency" ? "Prestations web" : "Travaux", 0)],
     items: [],
     laborHours: 0,
     laborRate: 45,
@@ -119,6 +119,9 @@ export const createEmptyQuote = (trade: "electrician" | "carpenter" | "webagency
     discountPercent: 0,
     tvaRate: 20,
     notes: "",
+    ...(trade === "webagency" && {
+      maintenanceInsurance: { enabled: false, price: 50 },
+    }),
   };
 };
 
