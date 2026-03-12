@@ -14,6 +14,7 @@ import {
   createDefaultSection,
 } from "@/lib/quote-utils";
 import { generateQuotePDF } from "@/lib/pdf-generator";
+import { saveQuoteToHistory } from "@/lib/quote-storage";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -64,6 +65,7 @@ import {
   Building2,
   LogOut,
   ShieldCheck,
+  History,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -252,6 +254,7 @@ const QuoteBuilder = () => {
     if (!quote || !calculations) return;
     try {
       generateQuotePDF(quote, calculations);
+      saveQuoteToHistory(quote);
     } catch (e) {
       console.error("PDF generation error:", e);
     }
@@ -268,6 +271,12 @@ const QuoteBuilder = () => {
                 <Link to="/">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Retour
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/mes-devis">
+                  <History className="w-4 h-4 mr-2" />
+                  Mes devis
                 </Link>
               </Button>
               <div className="hidden sm:flex items-center gap-2">

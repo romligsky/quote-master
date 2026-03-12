@@ -170,3 +170,57 @@ export const getItemsBySection = (quote: Quote, sectionId: string) => {
 export const getIncludedItems = (quote: Quote) => {
   return quote.items.filter(item => item.included);
 };
+
+/* =====================
+   HISTORIQUE DES DEVIS
+===================== */
+export interface QuoteHistoryEntry {
+  id: string;
+  number: string;
+  clientName: string;
+  date: string;
+  totalTTC: number;
+  trade: string;
+  savedAt: string;
+  quote: Quote;
+}
+
+const HISTORY_KEY = "deviselec_quote_history";
+const MAX_HISTORY = 50;
+
+export const saveQuoteToHistory = (quote: Quote, totalTTC: number): void => {
+  try {
+    const existing = loadQuoteHistory();
+    const entry: QuoteHistoryEntry = {
+      id: crypto.randomUUID(),
+      number: quote.number,
+      clientName: quote.client.name || "Client inconnu",
+      date: quote.date,
+      totalTTC,
+      trade: quote.trade,
+      savedAt: new Date().toISOString(),
+      quote,
+    };
+    const filtered = existing.filter((e) => e.number !== quote.number);
+    const updated = [entry, ...filtered].slice(0, MAX_HISTORY);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+  } catch (e) {
+    console.error("Error saving to history:", e);
+  }
+};
+
+export const loadQuoteHistory = (): QuoteHistoryEntry[] => {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const deleteQuoteFromHistory = (id: string): void => {
+  try {
+    const existing = loadQuoteHistory();
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(existing.filter((e) => e.id !== id)));
+  } catch {}
+};

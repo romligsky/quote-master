@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import QuoteBuilder from "./pages/QuoteBuilder";
+import QuoteHistory from "./pages/QuoteHistory";
 import AdminLogin from "./pages/AdminLogin";
 import NotFound from "./pages/NotFound";
 
@@ -21,6 +22,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/devis" element={<QuoteBuilder />} />
+            <Route path="/mes-devis" element={<QuoteHistory />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

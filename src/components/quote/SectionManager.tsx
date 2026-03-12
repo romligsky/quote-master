@@ -12,6 +12,17 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2, Layers } from "lucide-react";
 import { createDefaultSection } from "@/lib/quote-utils";
 
@@ -50,12 +61,6 @@ export const SectionManager = ({
       onRenameSection(editingSectionId, editingName.trim());
       setEditingSectionId(null);
       setEditingName("");
-    }
-  };
-
-  const handleDeleteSection = (sectionId: string) => {
-    if (sections.length > 1) {
-      onDeleteSection(sectionId);
     }
   };
 
@@ -111,7 +116,10 @@ export const SectionManager = ({
                 <Input
                   value={editingName}
                   onChange={(e) => setEditingName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSaveEdit()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSaveEdit();
+                    if (e.key === "Escape") { setEditingSectionId(null); }
+                  }}
                   onBlur={handleSaveEdit}
                   className="flex-1 mr-2"
                   autoFocus
@@ -131,18 +139,41 @@ export const SectionManager = ({
                   size="icon"
                   className="h-8 w-8"
                   onClick={() => handleStartEditing(section)}
+                  title="Renommer"
                 >
                   <Pencil className="w-4 h-4" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-destructive hover:text-destructive"
-                  onClick={() => handleDeleteSection(section.id)}
-                  disabled={sections.length <= 1}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:text-destructive"
+                      disabled={sections.length <= 1}
+                      title="Supprimer la section"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Supprimer « {section.name} » ?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Toutes les prestations de cette section seront également supprimées. Cette action est irréversible.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive hover:bg-destructive/90"
+                        onClick={() => onDeleteSection(section.id)}
+                      >
+                        Supprimer
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           ))}

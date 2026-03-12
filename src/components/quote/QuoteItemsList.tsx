@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { QuoteItem, QuoteSection, Product } from "@/types/quote";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,6 +71,9 @@ export const QuoteItemsList = ({
   );
   const [showDescriptions, setShowDescriptions] = useState<Record<string, boolean>>({});
   const [freeItemSection, setFreeItemSection] = useState<string | null>(null);
+  // Suppression avec double-confirmation : 1er clic = état "pending", 2e clic = suppression
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const pendingDeleteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [freeItemName, setFreeItemName] = useState("");
   const [freeItemPrice, setFreeItemPrice] = useState("");
   const [freeItemUnit, setFreeItemUnit] = useState("unité");
@@ -118,6 +121,20 @@ export const QuoteItemsList = ({
         unitPrice,
         total: unitPrice * item.quantity,
       });
+    }
+  };
+
+  const handleDeleteClick = (itemId: string) => {
+    if (pendingDelete === itemId) {
+      // 2e clic : confirme la suppression
+      if (pendingDeleteTimer.current) clearTimeout(pendingDeleteTimer.current);
+      setPendingDelete(null);
+      onRemoveItem(itemId);
+    } else {
+      // 1er clic : passe en état "attente de confirmation"
+      if (pendingDeleteTimer.current) clearTimeout(pendingDeleteTimer.current);
+      setPendingDelete(itemId);
+      pendingDeleteTimer.current = setTimeout(() => setPendingDelete(null), 3000);
     }
   };
 
@@ -320,15 +337,28 @@ export const QuoteItemsList = ({
                               {formatCurrency(item.total)}
                             </div>
 
-                            {/* Delete */}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-destructive hover:text-destructive"
-                              onClick={() => onRemoveItem(item.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            {/* Delete avec double-confirmation */}
+                            {pendingDelete === item.id ? (
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="h-8 text-xs px-2 animate-pulse"
+                                onClick={() => handleDeleteClick(item.id)}
+                                title="Cliquer à nouveau pour confirmer"
+                              >
+                                Confirmer ?
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-destructive hover:text-destructive"
+                                onClick={() => handleDeleteClick(item.id)}
+                                title="Supprimer (cliquer 2x pour confirmer)"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </div>
