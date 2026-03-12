@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"/c/Ancien-AAROM \\(GITHUB\\)/GIT/quote-master\")",
+      "Bash(find \"/c/Ancien-AAROM \\(GITHUB\\)/GIT/quote-master/src\" -type f)"
+    ]
+  }
+}
